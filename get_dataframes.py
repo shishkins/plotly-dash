@@ -19,9 +19,13 @@ def get_data():
 
     # преобразуем типы данных
     reprices_log_df['date_reprice'] = pd.to_datetime(reprices_log_df['date_reprice'])
+    reprices_errors_log_df['date_error'] = pd.to_datetime(reprices_errors_log_df['date_error'])
 
-    date_range_ser = pd.date_range(start=min(reprices_log_df['date_reprice'] - pd.DateOffset(months=1)),
-                                   end=max(reprices_log_df['date_reprice'] + pd.DateOffset(months=1)))
+    reprices_log_df.rename(columns={'date_reprice': 'date'}, inplace=True)
+    reprices_errors_log_df.rename(columns={'date_error': 'date'}, inplace=True)
+
+    date_range_ser = pd.date_range(start=min(reprices_log_df['date'] - pd.DateOffset(months=1)),
+                                   end=max(reprices_log_df['date'] + pd.DateOffset(months=1)))
     calendar_df = pd.DataFrame({'date': date_range_ser,
                                 'week_day': date_range_ser.weekday})
 
