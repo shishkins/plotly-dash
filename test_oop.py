@@ -16,6 +16,7 @@ class data_lake(object):
     Затем пользователем задаются аттрибуты фильтров
     После этого метод " " выдает отфильтрованный датафрейм на работу
     '''
+
     def __init__(self, **kwargs):
         '''
         Инициализация объекта с данными
@@ -27,8 +28,12 @@ class data_lake(object):
         self.main_df = self.main_df.merge(pricing_types_df, on='algorithm', how='left')
         self.main_df = self.main_df.merge(write_date_df, how='cross')
         self.errors_df = reprices_errors_log_df
-        self.picked_data = None
-        self.pricked_algorithms = None
+        self.picked_data = pd.DataFrame(
+            {
+            'start_date' : [reprices_log_df['date_reprice'].min()],
+            'end_date': [reprices_log_df['date_reprice'].max()]
+        })
+        self.picked_algorithms = pricing_types_df
 
     def filter_date_df(self, start_date=None, end_date=None):
         '''
@@ -42,17 +47,23 @@ class data_lake(object):
         limits['start_date'] = pd.to_datetime(limits['start_date'], format='ISO8601')
         limits['end_date'] = pd.to_datetime(limits['end_date'], format='ISO8601')
         self.picked_data = limits
-    def filter_algorithms(self, algorithms = None):
+
+    def filter_algorithms(self, algorithms=None):
         '''
         Метод, который обновляет список алгоритмов, выбранных пользователем
         :param algorithms:
         :return:
         '''
         algorithms_df = pd.DataFrame(
-            {'algorithm':algorithms}
+            {'type_name': algorithms}
         )
-        self.picked_algorithms = algorithms_df
 
+        self.picked_algorithms = algorithms_df
+    def filtered_df(self):
+        severed_df = self.main_df.loc[(self.main_df['date_reprice'] >= self.picked_data['start_date'].iloc[0]) &
+                                      (self.main_df['date_reprice'] <= self.picked_data['end_date'].iloc[0])]
+        severed_df = severed_df.merge(self.picked_algorithms, on = 'type_name')
+        return severed_df
 
 
 first_df = data_lake(pricing_types_df=pricing_types_df,
@@ -70,4 +81,7 @@ first_df.filter_algorithms(algorithms=['Малоценка', 'Агрегаты',
 
 print(first_df.picked_data)
 print(first_df.picked_algorithms)
+need = first_df.filtered_df()
+
+
 

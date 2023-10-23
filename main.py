@@ -29,10 +29,14 @@ class data_lake(object):
         self.main_df = self.main_df.merge(pricing_types_df, on='algorithm', how='left')
         self.main_df = self.main_df.merge(write_date_df, how='cross')
         self.errors_df = reprices_errors_log_df
-        self.picked_data = None
-        self.pricked_algorithms = None
+        self.picked_data = pd.DataFrame(
+            {
+            'start_date' : [reprices_log_df['date_reprice'].min()],
+            'end_date': [reprices_log_df['date_reprice'].max()]
+        })
+        self.picked_algorithms = pricing_types_df
 
-    def filter_date_df(self, start_date=None, end_date=None):
+    def filters_date(self, start_date=None, end_date=None):
         '''
         Метод, который обновляет выбранную пользователем дату
         :param start_date:
@@ -45,19 +49,22 @@ class data_lake(object):
         limits['end_date'] = pd.to_datetime(limits['end_date'], format='ISO8601')
         self.picked_data = limits
 
-    def filter_algorithms(self, algorithms=None):
+    def filters_algorithms(self, algorithms=None):
         '''
         Метод, который обновляет список алгоритмов, выбранных пользователем
         :param algorithms:
         :return:
         '''
         algorithms_df = pd.DataFrame(
-            {'algorithm': algorithms}
+            {'type_name': algorithms}
         )
+
         self.picked_algorithms = algorithms_df
     def filtered_df(self):
         severed_df = self.main_df.loc[(self.main_df['date_reprice'] >= self.picked_data['start_date'].iloc[0]) &
                                       (self.main_df['date_reprice'] <= self.picked_data['end_date'].iloc[0])]
+        severed_df = severed_df.merge(self.picked_algorithms, on = 'type_name')
+        return severed_df
 
 pricing_types_df, products_reference_df, reprices_errors_log_df, reprices_log_df, calendar_df, write_date_df = get_data()
 dict_of_dfs = {'pricing_types_df': pricing_types_df,
@@ -65,7 +72,7 @@ dict_of_dfs = {'pricing_types_df': pricing_types_df,
                'reprices_errors_log_df': reprices_errors_log_df,
                'calendar_df': calendar_df}
 
-main_df = data_lake(pricing_types_df=pricing_types_df,
+reprices_data = data_lake(pricing_types_df=pricing_types_df,
                     products_reference_df=products_reference_df,
                     reprices_errors_log_df=reprices_errors_log_df,
                     reprices_log_df=reprices_log_df,
@@ -126,18 +133,11 @@ app.layout = html.Div([
     Input('date-picker', 'end_date')
 )
 def update_output(start_date, end_date):
-
-    prices_log_fig = px.histogram(rounded_df, x='date_reprice')
+    reprices_data.filters_date(start_date=start_date, end_date=end_date)
+    need_to_view_df = reprices_data.filtered_df()
+    # reprices_data.filters_algorithms(algorithms=algorithms)
+    prices_log_fig = px.histogram(need_to_view_df, x='date_reprice')
     return prices_log_fig
-
-
-@callback(
-    Output('test', 'children'),
-    Input('check-list-algorithms', 'value')
-)
-def test_update(algorithms):
-    print(algorithms)
-    return None
 
 
 if __name__ == '__main__':
