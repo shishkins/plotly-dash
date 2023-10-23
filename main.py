@@ -82,8 +82,12 @@ reprices_data = data_lake(pricing_types_df=pricing_types_df,
 
 
 ''' LAYOUT '''
+
+
+theme = 'https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/darkly/bootstrap.min.css'
 app = Dash(__name__,
-           external_stylesheets=[dbc.themes.BOOTSTRAP])
+           external_stylesheets=[dbc.themes.FLATLY],
+           )
 
 calendar_button = dcc.DatePickerRange(id='date-picker',
                                       min_date_allowed=min(calendar_df['date']),
@@ -107,19 +111,19 @@ app.layout = html.Div([
     dbc.Row([
         dbc.Col([
             html.Div(id='date-picker-info'),
-            html.Div(calendar_button)
-        ]),
+            html.Div(calendar_button)],
+            width= {'size':1, 'order' :'first', 'offset':0}
+        ),
         dbc.Col([
             html.Div('Выберите тип переоценки'),
-            html.Div(algorithm_filter)
-        ])
+            html.Div(algorithm_filter)],
+            width= {'size':5, 'order' :'last', 'offset':0})
     ], style={'margin-bottom': 40}),
     dbc.Row([
         dbc.Col([
-            html.Div('Количество переоценок по датам:',
-                     id='test'),
-            reprices_log_fig
-        ])
+            html.Div('Количество переоценок по датам:'),
+            reprices_log_fig],
+            width= {'size':4, 'order' :'first', 'offset':0})
     ])
 ],
     style={'margin-left': '80px',
