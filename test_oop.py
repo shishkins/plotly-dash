@@ -82,6 +82,6 @@ first_df.filter_algorithms(algorithms=['Малоценка', 'Агрегаты',
 print(first_df.picked_data)
 print(first_df.picked_algorithms)
 need = first_df.filtered_df()
-
+print(need)
 
 

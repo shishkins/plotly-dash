@@ -15,7 +15,7 @@ class data_lake(object):
     Класс объекта модели данных, принцип работы:
     __init__ инициализирует модель данных через словарь позиционных аргументов **kwargs
     Затем пользователем задаются аттрибуты фильтров
-    После этого метод " " выдает отфильтрованный датафрейм на работу
+    После этого метод "filtered_df" выдает отфильтрованный датафрейм на работу
     '''
 
     def __init__(self, **kwargs):
@@ -67,6 +67,7 @@ class data_lake(object):
         return severed_df
 
 pricing_types_df, products_reference_df, reprices_errors_log_df, reprices_log_df, calendar_df, write_date_df = get_data()
+
 dict_of_dfs = {'pricing_types_df': pricing_types_df,
                'product_reference_df': products_reference_df,
                'reprices_errors_log_df': reprices_errors_log_df,
@@ -95,7 +96,7 @@ calendar_button = dcc.DatePickerRange(id='date-picker',
 algorithm_filter = dcc.Checklist(
     id='check-list-algorithms',
     options=[{'label': option, 'value': option} for option in pricing_types_df['type_name']],
-    value=[]
+    value=pricing_types_df['type_name']
 )
 
 reprices_log_fig = dcc.Graph(id='hist-prices-log',
@@ -129,13 +130,14 @@ app.layout = html.Div([
 
 @callback(
     Output('hist-prices-log', 'figure'),
-    Input('date-picker', 'start_date'),
-    Input('date-picker', 'end_date')
+    [Input('date-picker', 'start_date'),
+     Input('date-picker', 'end_date'),
+     Input('check-list-algorithms', 'value')]
 )
-def update_output(start_date, end_date):
+def update_output(start_date, end_date, algorithms):
     reprices_data.filters_date(start_date=start_date, end_date=end_date)
+    reprices_data.filters_algorithms(algorithms=algorithms)
     need_to_view_df = reprices_data.filtered_df()
-    # reprices_data.filters_algorithms(algorithms=algorithms)
     prices_log_fig = px.histogram(need_to_view_df, x='date_reprice')
     return prices_log_fig
 
