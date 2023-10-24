@@ -20,6 +20,13 @@ def get_fspb_ch_conn() -> db.ClickHouse:
 
 
 def csv_execute(period='month', how_long='3', rewrite=True):
+    '''
+    Функция извлечения "свежих" данных для записи в CSV
+    :param period: какие периоды необходимы, значения 'year', 'month', 'week', 'day' STR
+    :param how_long: сколько периодов необходимо INT
+    :param rewrite: флаг перезаписи, по умолчанию TRUE (если FALSE, перезаписи нет)
+    :return:
+    '''
     pg_conn = get_fspb_pg_conn()
     ch_conn = get_fspb_ch_conn()
 
