@@ -68,6 +68,11 @@ class data_lake(object):
         self.picked_algorithms = algorithms_df
 
     def filtered_df(self, df):
+        '''
+        Метод, возвращающий отфильтрованный датафрейм в соответствием с тем, что выбрал пользователь
+        :param df:
+        :return:
+        '''
         severed_df = df.loc[(df['date'] >= self.picked_data['start_date'].iloc[0]) &
                             (df['date'] <= self.picked_data['end_date'].iloc[0])]
         severed_df = severed_df.merge(self.picked_algorithms, on='type_name')
@@ -138,19 +143,24 @@ app.layout = html.Div([
 
 @callback(
     Output('hist-prices-log', 'figure'),
-    [Input('date-picker', 'start_date'),
+    [Input('hist-prices-log', 'figure'),
+     Input('date-picker', 'start_date'),
      Input('date-picker', 'end_date'),
      Input('check-list-algorithms', 'value')]
 )
-def update_output(start_date, end_date, algorithms):
+def update_output(figure,start_date, end_date, algorithms):
     reprices_data.filters_date(start_date=start_date, end_date=end_date)
     reprices_data.filters_algorithms(algorithms=algorithms)
 
     need_to_view_df = reprices_data.filtered_df(reprices_data.main_df)
     need_errors_df = reprices_data.filtered_df(reprices_data.errors_df)
-
-    prices_log_fig = px.histogram(need_to_view_df, x='date')
-    return prices_log_fig
+    reprices_log_fig = go.Figure()
+    reprices_log_fig.add_trace(go.Histogram(x=need_to_view_df['date']))
+    reprices_log_fig.add_trace(go.Histogram(x=need_errors_df['date']))
+    # figure.add_trace(go.Histogram(need_to_view_df, x='date'))
+    # figure.add_trace(go.Histogram(need_errors_df, x='date'))
+    # prices_log_fig = px.histogram(need_to_view_df, x='date')
+    return reprices_log_fig
 
 
 if __name__ == '__main__':
