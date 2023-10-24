@@ -157,9 +157,7 @@ def update_output(figure,start_date, end_date, algorithms):
     reprices_log_fig = go.Figure()
     reprices_log_fig.add_trace(go.Histogram(x=need_to_view_df['date']))
     reprices_log_fig.add_trace(go.Histogram(x=need_errors_df['date']))
-    # figure.add_trace(go.Histogram(need_to_view_df, x='date'))
-    # figure.add_trace(go.Histogram(need_errors_df, x='date'))
-    # prices_log_fig = px.histogram(need_to_view_df, x='date')
+
     return reprices_log_fig
 
 
